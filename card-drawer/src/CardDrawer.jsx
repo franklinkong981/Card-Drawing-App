@@ -6,17 +6,24 @@ const CardDrawer = () => {
   const [deckId, setDeckId] = useState(0);
   const [currentCardImage, setCurrentCardImage] = useState("");
 
+  useEffect(() => {
+    async function getNewDeck() {
+      const res = await axios.get("https://deckofcardsapi.com/api/deck/new");
+      setDeckId(res.deck_id);
+    }
+  }, []);
+
   return (
-    <div className="Card-Drawer">
+    <div className="CardDrawer">
       {
         deckId ? 
         (
           <div>
-            <button>DRAW CARD</button>
-            <Card />
+            <button className="CardDrawer-draw-button" onClick={drawCard}>DRAW CARD</button>
+            {currentCardImage ? <Card/> : <p className="CardDrawer-prompt">Press the button to draw a card!</p>}
           </div>
         ) 
-        : <h2 className="Card-Drawer-loader">Loading Cards...</h2>
+        : <h2 className="CardDrawer-loader">Loading Cards...</h2>
       }
     </div>
   );
