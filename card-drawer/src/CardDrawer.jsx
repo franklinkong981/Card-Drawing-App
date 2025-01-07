@@ -1,15 +1,18 @@
 import React, {useState, useEffect, useRef} from "react";
 import axios from "axios";
+import {v4 as uuid} from "uuid";
+
 import Card from "./Card.jsx";
 
 const CardDrawer = () => {
   const [deckId, setDeckId] = useState("");
-  const [currentCard, setCurrentCard] = useState(null);
+  const [cards, setCards] = useState([]);
   const [anyCardsLeft, setAnyCardsLeft] = useState(true);
 
+  //initially, get a new deck of cards and shuffle the cards.
   useEffect(() => {
     async function getNewDeck() {
-      const res = await axios.get("https://deckofcardsapi.com/api/deck/new");
+      const res = await axios.get("https://deckofcardsapi.com/api/deck/new/shuffle?deck_count=1");
       setDeckId(res.data.deck_id);
     }
     getNewDeck();
@@ -23,11 +26,15 @@ const CardDrawer = () => {
         setAnyCardsLeft(false);
       }
       else {
-        setCurrentCard(card => ({
-          imageUrl: res.data.cards[0].image,
-          value: res.data.cards[0].value,
-          suit: res.data.cards[0].suit
-        }));
+        setCards(cards => ([
+          ...cards,
+          {
+            id: uuid(),
+            imageUrl: res.data.cards[0].image,
+            value: res.data.cards[0].value,
+            suit: res.data.cards[0].suit
+          }
+        ]));
       }
     }
   };
@@ -39,12 +46,14 @@ const CardDrawer = () => {
         (
           <div>
             <button className="CardDrawer-draw-button" onClick={drawCard}>DRAW CARD</button>
-            {currentCard ? <Card imageUrl={currentCard.imageUrl} value={currentCard.value} suit={currentCard.suit}/> 
-            : <p className="CardDrawer-prompt">Press the button to draw a card!</p>}
-            {!anyCardsLeft && <p>ERROR: No cards remaining!</p>}
+            {cards.length ? (
+              <div className="CardDrawer-cards">
+                {cards.map((card) => <Card key={card.id} imageUrl={card.imageUrl} value={card.value} suit={card.suit}/>)}
+              </div> 
+            ) : <p className="CardDrawer-prompt">Press the button to draw a card!</p>}
+            {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
           </div>
-        ) 
-        : <h2 className="CardDrawer-loader">Loading Cards...</h2>
+        ) : <h2 className="CardDrawer-loader">Loading Cards...</h2>
       }
     </div>
   );
