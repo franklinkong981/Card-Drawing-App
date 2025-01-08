@@ -3,4 +3,18 @@
   flex-wrap: wrap;
 
   width: 80vw;
+  min-height: 50vh;
+  
+  background-color: lightblue;
+  border-radius: 10px;
+  border: 2px solid blue;
+}
+
+.CardDrawer-error-message {
+  color: red;
+}
+
+.CardDrawer-new-deck-button {
+  background-color: black;
+  color: white;
 }

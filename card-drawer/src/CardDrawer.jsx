@@ -84,7 +84,9 @@ const CardDrawer = () => {
         (
           <div>
             {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
-            <button className="CardDrawer-draw-button" onClick={toggleDrawing}>{isDrawing ? "Stop drawing" : "Start drawing"}</button>
+            <button className="CardDrawer-draw-button" style={isDrawing ? {backgroundColor: "red"} : {backgroundColor: "green"}} onClick={toggleDrawing}>
+              {isDrawing ? "Stop drawing" : "Start drawing"}
+            </button>
             {cards.length ? <button className="CardDrawer-new-deck-button" onClick={getNewDeck}>NEW DECK</button> : null}
             {cards.length ? (
               <div className="CardDrawer-cards">
