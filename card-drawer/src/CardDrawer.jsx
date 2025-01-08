@@ -9,6 +9,7 @@ const CardDrawer = () => {
   const [deckId, setDeckId] = useState("");
   const [cards, setCards] = useState([]);
   const [anyCardsLeft, setAnyCardsLeft] = useState(true);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   //initially, get a new deck of cards and shuffle the cards.
   useEffect(() => {
@@ -22,11 +23,10 @@ const CardDrawer = () => {
   //only calls the Deck of Cards API for a new card if there are still cards waiting to be drawn in the deck.
   const drawCard = async () => {
     if (anyCardsLeft) {
-      if (cards.length >= 52) {
+      const res = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw?count=1`);
+      if (res.data.cards.length === 0) {
         setAnyCardsLeft(false);
-      }
-      else {
-        const res = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw?count=1`);
+      } else {
         setCards(cards => ([
           ...cards,
           {
@@ -40,6 +40,30 @@ const CardDrawer = () => {
     }
   };
 
+  //Pressing the "Start Drawing" button sets isDrawing to True, which triggers useEffect which starts the 1-second interval for drawCard.
+  //Pressing the "Stop Drawing" button sets isDrawing to false, which triggers useEffect which stops the timer.
+  const toggleDrawing = () => {
+    setIsDrawing(isDrawing => !isDrawing);
+  };
+
+  //timerId.current starts out as undefined.
+  const timerId = useRef();
+
+  useEffect(() => {
+    async function handleDrawing() {
+      if (isDrawing) {
+        timerId.current = setInterval(async () => {
+          await drawCard();
+        }, 1000);
+      } else {
+        clearInterval(timerId.current);
+      }
+    }
+    handleDrawing();
+
+    return () => clearInterval(timerId.current);
+  }, [isDrawing]);
+
   //Generates a new shuffled deck of cards and clears all the cards currently on the page.
   const getNewDeck = async () => {
     async function getNewDeck() {
@@ -50,6 +74,7 @@ const CardDrawer = () => {
 
     setCards(cards => []);
     setAnyCardsLeft(anyCardsLeft => true);
+    setIsDrawing(isDrawing => false);
   };
 
   return (
@@ -59,8 +84,8 @@ const CardDrawer = () => {
         (
           <div>
             {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
-            <button className="CardDrawer-draw-button" onClick={drawCard}>DRAW CARD</button>
-            {cards.length ? <button onClick={getNewDeck}>NEW DECK</button> : null}
+            <button className="CardDrawer-draw-button" onClick={toggleDrawing}>{isDrawing ? "Stop drawing" : "Start drawing"}</button>
+            {cards.length ? <button className="CardDrawer-new-deck-button" onClick={getNewDeck}>NEW DECK</button> : null}
             {cards.length ? (
               <div className="CardDrawer-cards">
                 {cards.map((card) => <Card key={card.id} imageUrl={card.imageUrl} value={card.value} suit={card.suit}/>)}
