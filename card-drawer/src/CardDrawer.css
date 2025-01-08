@@ -1,0 +1,6 @@
+.CardDrawer-cards {
+  display: flex;
+  flex-wrap: wrap;
+
+  width: 80vw;
+}

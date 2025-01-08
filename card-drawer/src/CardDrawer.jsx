@@ -3,6 +3,7 @@ import axios from "axios";
 import {v4 as uuid} from "uuid";
 
 import Card from "./Card.jsx";
+import "./CardDrawer.css";
 
 const CardDrawer = () => {
   const [deckId, setDeckId] = useState("");
@@ -21,11 +22,11 @@ const CardDrawer = () => {
   //only calls the Deck of Cards API for a new card if there are still cards waiting to be drawn in the deck.
   const drawCard = async () => {
     if (anyCardsLeft) {
-      const res = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw?count=1`);
-      if (res.data.cards.length === 0) {
+      if (cards.length >= 52) {
         setAnyCardsLeft(false);
       }
       else {
+        const res = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw?count=1`);
         setCards(cards => ([
           ...cards,
           {
@@ -45,13 +46,13 @@ const CardDrawer = () => {
         deckId ? 
         (
           <div>
+            {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
             <button className="CardDrawer-draw-button" onClick={drawCard}>DRAW CARD</button>
             {cards.length ? (
               <div className="CardDrawer-cards">
                 {cards.map((card) => <Card key={card.id} imageUrl={card.imageUrl} value={card.value} suit={card.suit}/>)}
               </div> 
             ) : <p className="CardDrawer-prompt">Press the button to draw a card!</p>}
-            {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
           </div>
         ) : <h2 className="CardDrawer-loader">Loading Cards...</h2>
       }
