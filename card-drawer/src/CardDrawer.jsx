@@ -40,6 +40,18 @@ const CardDrawer = () => {
     }
   };
 
+  //Generates a new shuffled deck of cards and clears all the cards currently on the page.
+  const getNewDeck = async () => {
+    async function getNewDeck() {
+      const res = await axios.get("https://deckofcardsapi.com/api/deck/new/shuffle?deck_count=1");
+      setDeckId(deckId => res.data.deck_id);
+    }
+    getNewDeck();
+
+    setCards(cards => []);
+    setAnyCardsLeft(anyCardsLeft => true);
+  };
+
   return (
     <div className="CardDrawer">
       {
@@ -48,6 +60,7 @@ const CardDrawer = () => {
           <div>
             {!anyCardsLeft && <p className="CardDrawer-error-message">ERROR: No cards remaining!</p>}
             <button className="CardDrawer-draw-button" onClick={drawCard}>DRAW CARD</button>
+            {cards.length ? <button onClick={getNewDeck}>NEW DECK</button> : null}
             {cards.length ? (
               <div className="CardDrawer-cards">
                 {cards.map((card) => <Card key={card.id} imageUrl={card.imageUrl} value={card.value} suit={card.suit}/>)}
